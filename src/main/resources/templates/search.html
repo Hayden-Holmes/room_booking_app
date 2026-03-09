@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Room Search</title>
+</head>
+<body>
+    <div th:replace="~{/navbar :: navbar}"></div>
+
+    <h1>Search Rooms</h1>
+
+    <form th:action="@{/search}" method="get" th:object="${criteria}">
+        <div>
+            <label>Building:</label>
+            <select th:field="*{buildingId}">
+                <option value="">-- Select Building --</option>
+                <option th:each="b : ${buildings}"
+                        th:value="${b.id}"
+                        th:text="${b.name}">
+                </option>
+            </select>
+        </div>
+
+        <div>
+            <label>Amenities:</label>
+            <div th:each="a : ${amenities}">
+                <label>
+                    <input type="checkbox" th:field="*{requiredAmenities}" th:value="${a.id}" />
+                    <span th:text="${a.name}"></span>
+                </label>
+            </div>
+        </div>
+
+        <div>
+            <label>Minimum Capacity:</label>
+            <input type="number" th:field="*{minCapacity}" />
+        </div>
+
+        <div>
+            <label>Date:</label>
+            <input type="date" th:field="*{date}" required />
+        </div>
+
+        <div>
+            <label>Start Time:</label>
+            <select th:field="*{start}" required>
+                <option value="">-- Select --</option>
+                <option th:each="t : ${timeOptions}"
+                        th:value="${t}"
+                        th:text="${t}">
+                </option>
+            </select>
+        </div>
+
+        <div>
+            <label>End Time:</label>
+            <select th:field="*{end}" required>
+                <option value="">-- Select --</option>
+                <option th:each="t : ${timeOptions}"
+                        th:value="${t}"
+                        th:text="${t}">
+                </option>
+            </select>
+        </div>
+
+        <div>
+            <button type="submit">Search</button>
+        </div>
+    </form>
+
+    <hr/>
+
+    <h2>Results</h2>
+
+    <div th:if="${rooms == null or #lists.isEmpty(rooms)}">
+        <p>No rooms found.</p>
+    </div>
+
+    <table th:if="${rooms != null and !#lists.isEmpty(rooms)}" border="1">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Capacity</th>
+                <th>Building</th>
+
+                <th>Start</th> 
+                <th>End</th>
+                <th>Book</th>
+                <th>Details</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="room : ${rooms}">
+                <td th:text="${room.id}"></td>
+                <td th:text="${room.name}"></td>
+                <td th:text="${room.capacity}"></td>
+                <td th:text="${room.building.name}"></td>
+                
+                <td th:text="${criteria.start}"></td>
+                <td th:text="${criteria.end}"></td>
+
+
+                <td>
+                    <form th:action="@{/reservations/book}" method="post">
+                        <input type="hidden" name="roomId" th:value="${room.id}" />
+                        <input type="hidden" name="date" th:value="${criteria.date}" />
+                        <input type="hidden" name="startTime" th:value="${criteria.start}" />
+                        <input type="hidden" name="endTime" th:value="${criteria.end}" />
+                        <button type="submit">Book</button>
+                    </form>
+                </td>
+
+                <td>
+                    <form th:action="@{/rooms/{id}(id=${room.id})}" method="get">
+                        <input type="hidden" name="date" th:value="${criteria.date}" />
+                        <input type="hidden" name="start" th:value="${criteria.start}" />
+                        <input type="hidden" name="end" th:value="${criteria.end}" />
+                        <button type="submit">View Details</button>
+                    </form>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</body>
+</html>

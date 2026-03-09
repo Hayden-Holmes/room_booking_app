@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Room Details</title>
+</head>
+<body>
+    <div th:replace="~{/navbar :: navbar}"></div>
+
+    <h1>Room Details</h1>
+
+    <div th:if="${room != null}">
+        <p>
+            <strong>ID:</strong>
+            <span th:text="${room.id}"></span>
+        </p>
+
+        <p>
+            <strong>Name:</strong>
+            <span th:text="${room.name}"></span>
+        </p>
+
+        <p>
+            <strong>Capacity:</strong>
+            <span th:text="${room.capacity}"></span>
+        </p>
+
+        <p>
+            <strong>Amenities:</strong>
+            <span th:each="a, iter : ${room.amenities}">
+                <span th:text="${a.name}"></span><span th:if="${!iter.last}">, </span>
+            </span>
+        </p>
+
+        <p>
+            <strong>Building:</strong>
+            <span th:text="${room.building.name}"></span>
+        </p>
+    </div>
+
+    <hr/>
+
+    <h2>Selected Time</h2>
+
+    <p th:if="${date != null and start != null and end != null}"
+       th:text="|${date} from ${start} to ${end}|"></p>
+
+    <p th:if="${date == null or start == null or end == null}">
+        No date/time selected.
+    </p>
+
+    <h2>Book This Room</h2>
+
+    <form th:action="@{/reservations/book}" method="post">
+        <input type="hidden" name="roomId" th:value="${room.id}" />
+        <input type="hidden" name="date" th:value="${date}" />
+        <input type="hidden" name="startTime" th:value="${start}" />
+        <input type="hidden" name="endTime" th:value="${end}" />
+
+        <button type="submit"
+                th:disabled="${date == null or start == null or end == null}">
+            Book Room
+        </button>
+    </form>
+
+    <p>
+        <a th:href="@{/search}">Back to Search</a>
+    </p>
+</body>
+</html>

@@ -1,0 +1,9 @@
+<h1>Booking Confirmed</h1>
+
+<p th:if="${bookingSuccess}" th:text="${bookingSuccess}"></p>
+
+<p th:if="${reservationId}">
+  Reservation ID: <span th:text="${reservationId}"></span>
+</p>
+
+<a href="/dashboard">Go to dashboard</a>
