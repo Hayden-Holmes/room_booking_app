@@ -38,9 +38,9 @@ public class SearchController {
         model.addAttribute("amenities", amenityRepository.findAll());
         model.addAttribute("timeOptions", generateQuarterHours());
         log.info("Search performed with criteria: {}", criteria);
-        Iterable<?> amenities = amenityRepository.findAll();
-        System.out.println("Amenities: " + amenities);
-        System.out.println("Amenities: " + amenityRepository.findAll());
+        // Iterable<?> amenities = amenityRepository.findAll();
+        // System.out.println("Amenities: " + amenities);
+        // System.out.println("Amenities: " + amenityRepository.findAll());
         return "search";
     }
 

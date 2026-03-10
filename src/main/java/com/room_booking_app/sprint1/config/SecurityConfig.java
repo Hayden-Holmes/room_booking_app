@@ -24,14 +24,15 @@ public class SecurityConfig {
                 .requestMatchers("/login", "/logout").permitAll()
 
                 // PUBLIC search endpoints 
-                .requestMatchers("/", "/search").permitAll()
+                .requestMatchers( "/search").permitAll()
 
 
                 // EVERYTHING else requires login
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form
-                .defaultSuccessUrl("/search", true)
+                .defaultSuccessUrl("/", true)
+    
                 .permitAll()
 
                 )

@@ -32,4 +32,9 @@ public class DashboardController {
 
         return "dashboard";
     }
+
+    @GetMapping("/")
+    public String home() {
+        return "redirect:/dashboard";
+    }
 }
