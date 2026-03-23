@@ -1,12 +1,15 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <body>
-    <nav th:fragment="navbar" style="padding: 12px; border-bottom: 1px solid #ccc; margin-bottom: 20px;">
-        <a th:href="@{/search}" style="margin-right: 16px;">Search</a>
-        <a th:href="@{/dashboard}" style="margin-right: 16px;">Dashboard</a>
+    <nav th:fragment="navbar" class="nav">
+        <div class="nav-left">
+            <a th:href="@{/search}" class="brand">Room Booking</a>
+            <a th:href="@{/search}" class="nav-link">Search</a>
+            <a th:href="@{/dashboard}" class="nav-link">Dashboard</a>
+        </div>
 
-        <form th:action="@{/logout}" method="post" style="display: inline;">
-            <button type="submit">Logout</button>
+        <form th:action="@{/logout}" method="post" class="inline-form">
+            <button type="submit" class="btn btn-danger">Logout</button>
         </form>
     </nav>
 </body>

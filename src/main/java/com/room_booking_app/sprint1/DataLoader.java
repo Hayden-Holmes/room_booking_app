@@ -12,6 +12,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 @Component
 public class DataLoader implements CommandLineRunner {
@@ -94,6 +95,8 @@ public class DataLoader implements CommandLineRunner {
             Building b = new Building();
             b.setName(cols[0].trim());
             b.setAddress(cols[1].trim());
+            b.setOpeningTime(LocalTime.parse(cols[2].trim()));
+            b.setClosingTime(LocalTime.parse(cols[3].trim()));
 
             buildingRepo.save(b);
         }

@@ -1,4 +1,4 @@
-name,address
-Luddy Hall,700 N Woodlawn Ave Bloomington IN
-Wells Library,1320 E 10th St Bloomington IN
-IMU,900 E 7th St Bloomington IN
+name,address,openingTime,closingTime
+Luddy Hall,700 N Woodlawn Ave Bloomington IN,08:00,22:00
+Wells Library,1320 E 10th St Bloomington IN,08:00,23:59
+IMU,900 E 7th St Bloomington IN,07:00,23:00

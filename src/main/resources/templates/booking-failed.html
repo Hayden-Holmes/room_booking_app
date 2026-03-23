@@ -1,5 +1,18 @@
-<h1>Booking Failed</h1>
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{base :: layout('Booking Failed', ~{::content})}">
+<th:block th:fragment="content">
+    <section class="card">
+        <h1 class="section-title">Booking Failed</h1>
+        <p class="section-subtitle">The reservation could not be completed.</p>
 
-<p th:if="${bookingError}" th:text="${bookingError}"></p>
+        <div th:if="${bookingError}" class="message message-error">
+            <span th:text="${bookingError}"></span>
+        </div>
 
-<a href="/search">Back to search</a>
+        <div class="actions">
+            <a href="/search" class="btn btn-primary" style="display: inline-block;">Back to Search</a>
+            <a href="/dashboard" class="btn btn-secondary" style="display: inline-block;">Go to Dashboard</a>
+        </div>
+    </section>
+</th:block>
+</html>

@@ -9,4 +9,6 @@ import com.room_booking_app.sprint1.model.Building;
 @Repository
 public interface BuildingRepository extends CrudRepository<Building, Long> {
     Optional<Building> findByName(String name);
+
+    
 }

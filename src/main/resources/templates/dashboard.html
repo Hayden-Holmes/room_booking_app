@@ -1,66 +1,61 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head>
-    <title>My Reservations</title>
-    <meta charset="UTF-8">
-</head>
-<body>
-    <div th:replace="~{navbar :: navbar}"></div>
-    
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{base :: layout('My Reservations', ~{::content})}">
+<th:block th:fragment="content">
+    <section class="card">
+        <h1 class="section-title">My Reservations</h1>
+        <p class="section-subtitle">Review current bookings and cancel active reservations.</p>
 
-    <h2>My Reservations</h2>
+        <div th:if="${cancelSuccess}" class="message message-success">
+            <span th:text="${cancelSuccess}"></span>
+        </div>
 
-    <!-- Flash Messages -->
-    <div th:if="${cancelSuccess}">
-        <p style="color: green;" th:text="${cancelSuccess}"></p>
-    </div>
+        <div th:if="${cancelError}" class="message message-error">
+            <span th:text="${cancelError}"></span>
+        </div>
 
-    <div th:if="${cancelError}">
-        <p style="color: red;" th:text="${cancelError}"></p>
-    </div>
+        <div th:if="${#lists.isEmpty(reservations)}" class="empty-state">
+            No reservations found.
+        </div>
 
-    <!-- No Reservations -->
-    <div th:if="${#lists.isEmpty(reservations)}">
-        <p>No reservations found.</p>
-    </div>
+        <div class="table-wrap" th:if="${!#lists.isEmpty(reservations)}">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Room</th>
+                        <th>Start</th>
+                        <th>End</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="r : ${reservations}">
+                        <td th:text="${r.room.name}">Room Name</td>
+                        <td th:text="${#temporals.format(r.startTime, 'yyyy-MM-dd HH:mm')}">Start</td>
+                        <td th:text="${#temporals.format(r.endTime, 'yyyy-MM-dd HH:mm')}">End</td>
+                        <td>
+                            <span class="status-badge" th:text="${r.status}">Status</span>
+                        </td>
+                        <td>
+                            <form th:if="${r.status.name() == 'BOOKED'}"
+                                  th:action="@{|/reservations/${r.id}/cancel|}"
+                                  method="post"
+                                  class="inline-form">
+                                <input type="hidden"
+                                       th:name="${_csrf.parameterName}"
+                                       th:value="${_csrf.token}" />
+                                <button type="submit" class="btn btn-danger">Cancel</button>
+                            </form>
+                            <span th:if="${r.status.name() != 'BOOKED'}" class="muted">No actions</span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
 
-    <!-- Reservations Table -->
-    <table th:if="${!#lists.isEmpty(reservations)}" border="1">
-        <thead>
-            <tr>
-                <th>Room</th>
-                <th>Start</th>
-                <th>End</th>
-                <th>Status</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr th:each="r : ${reservations}">
-                <td th:text="${r.room.name}">Room Name</td>
-                <td th:text="${#temporals.format(r.startTime, 'yyyy-MM-dd HH:mm')}">Start</td>
-                <td th:text="${#temporals.format(r.endTime, 'yyyy-MM-dd HH:mm')}">End</td>
-                <td th:text="${r.status}">Status</td>
-                <td>
-                    <!-- Show Cancel only if BOOKED -->
-                    <form th:if="${r.status.name() == 'BOOKED'}"
-                        th:action="@{|/reservations/${r.id}/cancel|}"
-                        method="post">
-                        
-                        <!-- CSRF token required -->
-                        <input type="hidden"
-                            th:name="${_csrf.parameterName}"
-                            th:value="${_csrf.token}" />
-
-                        <button type="submit">Cancel</button>
-                    </form>
-                </td>
-            </tr>
-        </tbody>
-    </table>
-
-    <br>
-    <a href="/search">Back to Search</a>
-
-</body>
+        <div class="actions">
+            <a href="/search" class="btn btn-secondary" style="display: inline-block;">Back to Search</a>
+        </div>
+    </section>
+</th:block>
 </html>

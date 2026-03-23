@@ -3,6 +3,7 @@ package com.room_booking_app.sprint1.service;
 import com.room_booking_app.sprint1.data.ReservationRepository;
 import com.room_booking_app.sprint1.data.RoomRepository;
 import com.room_booking_app.sprint1.data.UserRepository;
+import com.room_booking_app.sprint1.model.Building;
 import com.room_booking_app.sprint1.model.Reservation;
 import com.room_booking_app.sprint1.model.Room;
 import com.room_booking_app.sprint1.model.User;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.security.access.AccessDeniedException;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 @Service
 public class ReservationService {
@@ -54,6 +56,15 @@ public class ReservationService {
         boolean conflict = reservationRepo.existsByRoomIdAndStatusAndStartTimeLessThanAndEndTimeGreaterThan(
                 roomId, Reservation.ReservationStatus.BOOKED, end, start
         );
+
+        Building building = room.getBuilding();
+
+        LocalTime reservationStart = start.toLocalTime();
+        LocalTime reservationEnd = end.toLocalTime();
+
+        if (!building.isOpenDuring(reservationStart, reservationEnd)) {
+            throw new IllegalArgumentException("Reservation must be within building operating hours.");
+}
 
         if (conflict) {
             throw new IllegalStateException("Room already booked for that time range");

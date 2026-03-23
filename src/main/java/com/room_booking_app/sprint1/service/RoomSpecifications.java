@@ -11,6 +11,7 @@ import jakarta.persistence.criteria.Subquery;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 
 public final class RoomSpecifications {
@@ -54,10 +55,7 @@ public final class RoomSpecifications {
                 (minCapacity == null) ? cb.conjunction() : cb.greaterThanOrEqualTo(root.get("capacity"), minCapacity);
     }
 
-    /**
-     * Excludes rooms that have an overlapping BOOKED reservation in [start, end).
-     * Overlap rule: res.start < end AND res.end > start
-     */
+    
     public static Specification<Room> isAvailable(LocalDateTime start, LocalDateTime end) {
         return (roomRoot, query, cb) -> {
             //throw exeption if only one of start/end is provided, otherwise ignore availability filter
@@ -85,4 +83,10 @@ public final class RoomSpecifications {
             return cb.not(cb.exists(sub));
         };
     }
-}
+    public static Specification<Room> isWithinBuildingHours(LocalTime start, LocalTime end) {
+        return (root, query, cb) -> cb.and(
+            cb.lessThanOrEqualTo(root.get("building").get("openingTime"), start),
+            cb.greaterThanOrEqualTo(root.get("building").get("closingTime"), end)
+
+     );
+}}

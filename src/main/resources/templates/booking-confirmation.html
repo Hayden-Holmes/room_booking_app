@@ -1,9 +1,23 @@
-<h1>Booking Confirmed</h1>
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{base :: layout('Booking Confirmed', ~{::content})}">
+<th:block th:fragment="content">
+    <section class="card">
+        <h1 class="section-title">Booking Confirmed</h1>
+        <p class="section-subtitle">Your reservation was created successfully.</p>
 
-<p th:if="${bookingSuccess}" th:text="${bookingSuccess}"></p>
+        <div th:if="${bookingSuccess}" class="message message-success">
+            <span th:text="${bookingSuccess}"></span>
+        </div>
 
-<p th:if="${reservationId}">
-  Reservation ID: <span th:text="${reservationId}"></span>
-</p>
+        <div th:if="${reservationId}" class="detail-item" style="max-width: 360px;">
+            <div class="detail-label">Reservation ID</div>
+            <div class="detail-value" th:text="${reservationId}"></div>
+        </div>
 
-<a href="/dashboard">Go to dashboard</a>
+        <div class="actions">
+            <a href="/dashboard" class="btn btn-primary" style="display: inline-block;">Go to Dashboard</a>
+            <a href="/search" class="btn btn-secondary" style="display: inline-block;">Search More Rooms</a>
+        </div>
+    </section>
+</th:block>
+</html>

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Room Details</title>
+</head>
+<body>
+    <div th:replace="~{/navbar :: navbar}"></div>
+
+    <h1>Room Details</h1>
+
+    <div th:if="${room != null}">
+        <p>
+            <strong>ID:</strong>
+            <span th:text="${room.id}"></span>
+        </p>
+
+        <p>
+            <strong>Name:</strong>
+            <span th:text="${room.name}"></span>
+        </p>
+
+        <p>
+            <strong>Capacity:</strong>
+            <span th:text="${room.capacity}"></span>
+        </p>
+
+        <p>
+            <strong>Amenities:</strong>
+            <span th:each="a, iter : ${room.amenities}">
+                <span th:text="${a.name}"></span><span th:if="${!iter.last}">, </span>
+            </span>
+        </p>
+
+        <p>
+            <strong>Building:</strong>
+            <span th:text="${room.building.name}"></span>
+        </p>
+
+        <p>
+            <strong>Building Hours:</strong>
+            <span th:text="${room.building.openingTime}"></span>
+            -
+            <span th:text="${room.building.closingTime}"></span>
+        </p>
+    </div>
+
+    <hr/>
+
+    <h2>Selected Time</h2>
+
+    <p th:if="${date != null and start != null and end != null}"
+       th:text="|${date} from ${start} to ${end}|"></p>
+
+    <p th:if="${date == null or start == null or end == null}">
+        No date/time selected.
+    </p>
+
+    <div th:if="${buildingOpen != null and !buildingOpen}">
+        <p>Building is closed during the selected time.</p>
+    </div>
+
+    <div th:if="${roomAvailable != null and !roomAvailable}">
+        <p>Room is already reserved during the selected time.</p>
+    </div>
+
+    <hr/>
+
+    <h2 th:if="${date != null}">Reservations for Selected Day</h2>
+    <h2 th:if="${date == null}">Reservations</h2>
+
+    <div th:if="${reservationsForDay == null or #lists.isEmpty(reservationsForDay)}">
+        <p>No reservations for this day.</p>
+    </div>
+
+    <table th:if="${reservationsForDay != null and !#lists.isEmpty(reservationsForDay)}" border="1">
+        <thead>
+            <tr>
+                <th>Start</th>
+                <th>End</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="reservation : ${reservationsForDay}">
+                <td th:text="${#temporals.format(reservation.startTime, 'HH:mm')}"></td>
+                <td th:text="${#temporals.format(reservation.endTime, 'HH:mm')}"></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <hr/>
+
+    <h2>Book This Room</h2>
+
+    <form th:action="@{/reservations/book}" method="post">
+        <input type="hidden" name="roomId" th:value="${room.id}" />
+        <input type="hidden" name="date" th:value="${date}" />
+        <input type="hidden" name="startTime" th:value="${start}" />
+        <input type="hidden" name="endTime" th:value="${end}" />
+
+        <button type="submit"
+                th:disabled="${date == null or start == null or end == null or (buildingOpen != null and !buildingOpen) or (roomAvailable != null and !roomAvailable)}">
+            Book Room
+        </button>
+    </form>
+
+    <p>
+        <a th:href="@{/search}">Back to Search</a>
+    </p>
+</body>
+</html>

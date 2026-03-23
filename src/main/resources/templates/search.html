@@ -1,125 +1,132 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head>
-    <title>Room Search</title>
-</head>
-<body>
-    <div th:replace="~{navbar :: navbar}"></div>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{base :: layout('Room Search', ~{::content})}">
+<th:block th:fragment="content">
+    <div class="stack">
+        <section class="card">
+            <h1 class="section-title">Search Rooms</h1>
+            <p class="section-subtitle">Filter by building, amenities, capacity, and time window.</p>
 
-    <h1>Search Rooms</h1>
+            <form th:action="@{/search}" method="get" th:object="${criteria}">
+                <div class="grid grid-2">
+                    <div class="field-group">
+                        <label for="buildingId">Building</label>
+                        <select id="buildingId" th:field="*{buildingId}">
+                            <option value="">-- Select Building --</option>
+                            <option th:each="b : ${buildings}"
+                                    th:value="${b.id}"
+                                    th:text="${b.name}">
+                            </option>
+                        </select>
+                    </div>
 
-    <form th:action="@{/search}" method="get" th:object="${criteria}">
-        <div>
-            <label>Building:</label>
-            <select th:field="*{buildingId}">
-                <option value="">-- Select Building --</option>
-                <option th:each="b : ${buildings}"
-                        th:value="${b.id}"
-                        th:text="${b.name}">
-                </option>
-            </select>
-        </div>
+                    <div class="field-group">
+                        <label for="minCapacity">Minimum Capacity</label>
+                        <input id="minCapacity" type="number" th:field="*{minCapacity}" />
+                    </div>
 
-        <div>
-            <label>Amenities:</label>
-            <div th:each="a : ${amenities}">
-                <label>
-                    <input type="checkbox" th:field="*{requiredAmenities}" th:value="${a.id}" />
-                    <span th:text="${a.name}"></span>
-                </label>
+                    <div class="field-group">
+                        <label for="date">Date</label>
+                        <input id="date" type="date" th:field="*{date}" required />
+                    </div>
+
+                    <div class="field-group">
+                        <label for="start">Start Time</label>
+                        <select id="start" th:field="*{start}" required>
+                            <option value="">-- Select --</option>
+                            <option th:each="t : ${timeOptions}"
+                                    th:value="${t}"
+                                    th:text="${t}">
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="field-group">
+                        <label for="end">End Time</label>
+                        <select id="end" th:field="*{end}" required>
+                            <option value="">-- Select --</option>
+                            <option th:each="t : ${timeOptions}"
+                                    th:value="${t}"
+                                    th:text="${t}">
+                            </option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="field-group">
+                    <label>Amenities</label>
+                    <div class="checkbox-list">
+                        <label class="checkbox-item" th:each="a : ${amenities}">
+                            <input type="checkbox" th:field="*{requiredAmenities}" th:value="${a.id}" />
+                            <span th:text="${a.name}"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="actions">
+                    <button type="submit" class="btn btn-primary">Search</button>
+                </div>
+            </form>
+        </section>
+
+        <section class="card">
+            <h2 class="section-title" style="font-size: 22px;">Results</h2>
+            <p class="section-subtitle">Availability for the selected date and time.</p>
+
+            <div th:if="${rooms == null or #lists.isEmpty(rooms)}" class="empty-state">
+                No rooms found.
             </div>
-        </div>
 
-        <div>
-            <label>Minimum Capacity:</label>
-            <input type="number" th:field="*{minCapacity}" />
-        </div>
-
-        <div>
-            <label>Date:</label>
-            <input type="date" th:field="*{date}" required />
-        </div>
-
-        <div>
-            <label>Start Time:</label>
-            <select th:field="*{start}" required>
-                <option value="">-- Select --</option>
-                <option th:each="t : ${timeOptions}"
-                        th:value="${t}"
-                        th:text="${t}">
-                </option>
-            </select>
-        </div>
-
-        <div>
-            <label>End Time:</label>
-            <select th:field="*{end}" required>
-                <option value="">-- Select --</option>
-                <option th:each="t : ${timeOptions}"
-                        th:value="${t}"
-                        th:text="${t}">
-                </option>
-            </select>
-        </div>
-
-        <div>
-            <button type="submit">Search</button>
-        </div>
-    </form>
-
-    <hr/>
-
-    <h2>Results</h2>
-
-    <div th:if="${rooms == null or #lists.isEmpty(rooms)}">
-        <p>No rooms found.</p>
+            <div class="table-wrap" th:if="${rooms != null and !#lists.isEmpty(rooms)}">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Capacity</th>
+                            <th>Building</th>
+                            <th>Start</th>
+                            <th>End</th>
+                            <th>Status</th>
+                            <th>Book</th>
+                            <th>Details</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="result : ${rooms}">
+                            <td th:text="${result.room.id}"></td>
+                            <td th:text="${result.room.name}"></td>
+                            <td th:text="${result.room.capacity}"></td>
+                            <td th:text="${result.room.building.name}"></td>
+                            <td th:text="${criteria.start}"></td>
+                            <td th:text="${criteria.end}"></td>
+                            <td>
+                                <span th:if="${result.bookable}" class="status-badge status-available">Available</span>
+                                <span th:if="${!result.available and result.buildingOpen}" class="status-badge status-booked">Booked</span>
+                                <span th:if="${result.available and !result.buildingOpen}" class="status-badge status-closed">Building Closed</span>
+                                <span th:if="${!result.available and !result.buildingOpen}" class="status-badge status-mixed">Booked / Building Closed</span>
+                            </td>
+                            <td>
+                                <form th:if="${result.bookable}" th:action="@{/reservations/book}" method="post" class="inline-form">
+                                    <input type="hidden" name="roomId" th:value="${result.room.id}" />
+                                    <input type="hidden" name="date" th:value="${criteria.date}" />
+                                    <input type="hidden" name="startTime" th:value="${criteria.start}" />
+                                    <input type="hidden" name="endTime" th:value="${criteria.end}" />
+                                    <button type="submit" class="btn btn-primary">Book</button>
+                                </form>
+                            </td>
+                            <td>
+                                <form th:action="@{/rooms/{id}(id=${result.room.id})}" method="get" class="inline-form">
+                                    <input type="hidden" name="date" th:value="${criteria.date}" />
+                                    <input type="hidden" name="start" th:value="${criteria.start}" />
+                                    <input type="hidden" name="end" th:value="${criteria.end}" />
+                                    <button type="submit" class="btn btn-secondary">View Details</button>
+                                </form>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
     </div>
-
-    <table th:if="${rooms != null and !#lists.isEmpty(rooms)}" border="1">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Name</th>
-                <th>Capacity</th>
-                <th>Building</th>
-
-                <th>Start</th> 
-                <th>End</th>
-                <th>Book</th>
-                <th>Details</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr th:each="room : ${rooms}">
-                <td th:text="${room.id}"></td>
-                <td th:text="${room.name}"></td>
-                <td th:text="${room.capacity}"></td>
-                <td th:text="${room.building.name}"></td>
-                
-                <td th:text="${criteria.start}"></td>
-                <td th:text="${criteria.end}"></td>
-
-
-                <td>
-                    <form th:action="@{/reservations/book}" method="post">
-                        <input type="hidden" name="roomId" th:value="${room.id}" />
-                        <input type="hidden" name="date" th:value="${criteria.date}" />
-                        <input type="hidden" name="startTime" th:value="${criteria.start}" />
-                        <input type="hidden" name="endTime" th:value="${criteria.end}" />
-                        <button type="submit">Book</button>
-                    </form>
-                </td>
-
-                <td>
-                    <form th:action="@{/rooms/{id}(id=${room.id})}" method="get">
-                        <input type="hidden" name="date" th:value="${criteria.date}" />
-                        <input type="hidden" name="start" th:value="${criteria.start}" />
-                        <input type="hidden" name="end" th:value="${criteria.end}" />
-                        <button type="submit">View Details</button>
-                    </form>
-                </td>
-            </tr>
-        </tbody>
-    </table>
-</body>
+</th:block>
 </html>
