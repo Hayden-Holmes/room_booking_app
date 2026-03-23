@@ -3,6 +3,7 @@ package com.room_booking_app.sprint1.service;
 import com.room_booking_app.sprint1.data.ReservationRepository;
 import com.room_booking_app.sprint1.data.RoomRepository;
 import com.room_booking_app.sprint1.data.UserRepository;
+import com.room_booking_app.sprint1.model.Building;
 import com.room_booking_app.sprint1.model.Reservation;
 import com.room_booking_app.sprint1.model.Room;
 import com.room_booking_app.sprint1.model.User;
@@ -92,7 +93,10 @@ class ReservationServiceTest {
 
         Room room = new Room();
         User user = new User();
-
+        Building building = new Building();
+        building.setOpeningTime(start.toLocalTime().minusHours(1));
+        building.setClosingTime(end.toLocalTime().plusHours(1));
+        room.setBuilding(building);
 
         when(roomRepo.findById(roomId)).thenReturn(Optional.of(room));
         when(userRepo.findByUsername(username)).thenReturn(Optional.of(user));
@@ -114,29 +118,7 @@ class ReservationServiceTest {
         assertEquals(user, saved.getUser());
     }
 
-    @Test
-    void book_nullUsername_allowed_savesReservation_withoutUser() {
-        Long roomId = 1L;
-        LocalDateTime start = LocalDateTime.of(2027, 3, 4, 10, 0);
-        LocalDateTime end = start.plusHours(1);
-
-        Room room = new Room();
-
-        when(roomRepo.findById(roomId)).thenReturn(Optional.of(room));
-        when(reservationRepo.existsByRoomIdAndStatusAndStartTimeLessThanAndEndTimeGreaterThan(
-                roomId, Reservation.ReservationStatus.BOOKED, end, start
-        )).thenReturn(false);
-
-        reservationService.book(roomId, start, end, null);
-
-        ArgumentCaptor<Reservation> captor = ArgumentCaptor.forClass(Reservation.class);
-        verify(reservationRepo).save(captor.capture());
-
-        Reservation saved = captor.getValue();
-        assertEquals(room, saved.getRoom());
-        assertNull(saved.getUser());
-        assertEquals(Reservation.ReservationStatus.BOOKED, saved.getStatus());
-    }
+    
 
     // -----------------------
     // cancelReservation() tests

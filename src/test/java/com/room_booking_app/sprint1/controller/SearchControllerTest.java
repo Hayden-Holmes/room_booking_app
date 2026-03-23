@@ -64,9 +64,9 @@ class SearchControllerTest {
         List<String> timeOptions = (List<String>) model.getAttribute("timeOptions");
 
         assertNotNull(timeOptions);
-        assertEquals(96, timeOptions.size());
-        assertEquals("00:00", timeOptions.get(0));
-        assertEquals("00:15", timeOptions.get(1));
+        assertEquals(68, timeOptions.size());
+        assertEquals("07:00", timeOptions.get(0));
+        assertEquals("07:15", timeOptions.get(1));
         assertEquals("23:45", timeOptions.get(timeOptions.size() - 1));
 
         verify(roomSearchService).search(criteria);
@@ -94,7 +94,7 @@ class SearchControllerTest {
         List<String> timeOptions = (List<String>) model.getAttribute("timeOptions");
 
         assertNotNull(timeOptions);
-        assertEquals(96, timeOptions.size());
+        assertEquals(68, timeOptions.size());
 
         verify(roomSearchService).search(criteria);
         verify(buildingRepository).findAll();
