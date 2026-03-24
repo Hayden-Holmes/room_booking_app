@@ -23,6 +23,7 @@ class ReservationServiceTest {
     private ReservationRepository reservationRepo;
     private RoomRepository roomRepo;
     private UserRepository userRepo;
+    private EmailService emailService;
 
     private ReservationService reservationService;
 
@@ -31,8 +32,9 @@ class ReservationServiceTest {
         reservationRepo = mock(ReservationRepository.class);
         roomRepo = mock(RoomRepository.class);
         userRepo = mock(UserRepository.class);
+        emailService = mock(EmailService.class);
 
-        reservationService = new ReservationService(reservationRepo, roomRepo, userRepo);
+        reservationService = new ReservationService(reservationRepo, roomRepo, userRepo, emailService);
     }
 
     // -----------------------
@@ -48,40 +50,47 @@ class ReservationServiceTest {
         assertThrows(IllegalArgumentException.class,
                 () -> reservationService.book(roomId, start, end, "user"));
 
-        verifyNoInteractions(roomRepo, userRepo, reservationRepo);
+        verifyNoInteractions(roomRepo, userRepo, reservationRepo, emailService);
     }
 
     @Test
     void book_endNotAfterStart_throwsIllegalArgumentException() {
         Long roomId = 1L;
         LocalDateTime start = LocalDateTime.of(2026, 3, 4, 10, 0);
-        LocalDateTime end = start; // not after
+        LocalDateTime end = start;
 
         assertThrows(IllegalArgumentException.class,
                 () -> reservationService.book(roomId, start, end, "user"));
 
-        verifyNoInteractions(roomRepo, userRepo, reservationRepo);
+        verifyNoInteractions(roomRepo, userRepo, reservationRepo, emailService);
     }
-
-    
 
     @Test
     void book_conflictExists_throwsIllegalStateException_andDoesNotSave() {
         Long roomId = 1L;
-        LocalDateTime start = LocalDateTime.of(2026, 3, 4, 10, 0);
+        LocalDateTime start = LocalDateTime.of(2027, 3, 4, 10, 0);
         LocalDateTime end = start.plusHours(1);
         String username = "hayden";
 
-        when(roomRepo.findById(roomId)).thenReturn(Optional.of(new Room()));
-        when(userRepo.findByUsername(username)).thenReturn(Optional.of(new User()));
+        Room room = new Room();
+        Building building = new Building();
+        building.setOpeningTime(start.toLocalTime().minusHours(1));
+        building.setClosingTime(end.toLocalTime().plusHours(1));
+        room.setBuilding(building);
+
+        User user = new User();
+
+        when(roomRepo.findById(roomId)).thenReturn(Optional.of(room));
+        when(userRepo.findByUsername(username)).thenReturn(Optional.of(user));
         when(reservationRepo.existsByRoomIdAndStatusAndStartTimeLessThanAndEndTimeGreaterThan(
                 roomId, Reservation.ReservationStatus.BOOKED, end, start
         )).thenReturn(true);
 
-        assertThrows(IllegalArgumentException.class,
+        assertThrows(IllegalStateException.class,
                 () -> reservationService.book(roomId, start, end, username));
 
         verify(reservationRepo, never()).save(any());
+        verify(emailService, never()).sendBookingConfirmation(any());
     }
 
     @Test
@@ -93,6 +102,8 @@ class ReservationServiceTest {
 
         Room room = new Room();
         User user = new User();
+        user.setEmail("hayden@example.com");
+
         Building building = new Building();
         building.setOpeningTime(start.toLocalTime().minusHours(1));
         building.setClosingTime(end.toLocalTime().plusHours(1));
@@ -116,9 +127,9 @@ class ReservationServiceTest {
         assertEquals(end, saved.getEndTime());
         assertEquals(room, saved.getRoom());
         assertEquals(user, saved.getUser());
-    }
 
-    
+        verify(emailService).sendBookingConfirmation(any(Reservation.class));
+    }
 
     // -----------------------
     // cancelReservation() tests

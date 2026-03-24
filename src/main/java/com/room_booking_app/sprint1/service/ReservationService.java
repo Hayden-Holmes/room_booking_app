@@ -21,13 +21,15 @@ public class ReservationService {
     private final ReservationRepository reservationRepo;
     private final RoomRepository roomRepo;
     private final UserRepository userRepo;
+    private final EmailService emailService;
 
     public ReservationService(ReservationRepository reservationRepo,
                               RoomRepository roomRepo,
-                              UserRepository userRepo) {
+                              UserRepository userRepo, EmailService emailService) {
         this.reservationRepo = reservationRepo;
         this.roomRepo = roomRepo;
         this.userRepo = userRepo;
+        this.emailService = emailService;
     }
 
     @Transactional
@@ -80,6 +82,9 @@ public class ReservationService {
         }
 
         reservationRepo.save(r);
+        if (user != null) {
+            emailService.sendBookingConfirmation(r);
+        }
     }
 
     @Transactional
