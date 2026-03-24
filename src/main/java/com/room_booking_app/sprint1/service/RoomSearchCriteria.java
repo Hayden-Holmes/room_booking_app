@@ -8,10 +8,13 @@ import java.util.Set;
 
 @Data
 public class RoomSearchCriteria {
-    private Long buildingId;                   // optional
-    private Integer minCapacity;               // optional
-    private Set<Amenity> requiredAmenities;    // optional (empty = ignore)
-    private LocalDate date;               // not optional
-    private String start;              // not optional
-    private String end;                 // not ooptional
+    private Long buildingId;                  
+    private Integer minCapacity;               
+    private Set<Amenity> requiredAmenities;    
+    private LocalDate date;               
+    private String start;              
+    private String end; 
+    public boolean isHasTime() {
+        return date != null && start != null && end != null;
+}                
 }

@@ -3,7 +3,7 @@
 <th:block th:fragment="content">
     <section class="card">
         <h1 class="section-title">Booking Failed</h1>
-        <p class="section-subtitle">The reservation could not be completed.</p>
+        <p class="section-subtitle">The reservation could not be completed for the selected time.</p>
 
         <div th:if="${bookingError}" class="message message-error">
             <span th:text="${bookingError}"></span>

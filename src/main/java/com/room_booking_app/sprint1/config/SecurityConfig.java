@@ -25,7 +25,7 @@ public class SecurityConfig {
 
                 // PUBLIC search endpoints 
                 .requestMatchers( "/search").permitAll()
-
+                .requestMatchers("/rooms/{id}").permitAll()
 
                 // EVERYTHING else requires login
                 .anyRequest().authenticated()

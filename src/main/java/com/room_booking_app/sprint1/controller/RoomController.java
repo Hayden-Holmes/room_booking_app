@@ -38,6 +38,8 @@ public class RoomController {
         Room room = roomRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Room not found: " + id));
 
+
+        // Fetch reservations for the selected date (if provided)
         List<Reservation> reservationsForDay = List.of();
         Boolean buildingOpen = null;
         Boolean roomAvailable = null;
@@ -49,6 +51,7 @@ public class RoomController {
             reservationsForDay = reservationRepository.findReservationsForDay(id, dayStart, dayEnd);
         }
 
+        // Check building hours and room availability if date and time are provided
         if (date != null && start != null && end != null) {
             LocalDateTime startDateTime = LocalDateTime.of(date, start);
             LocalDateTime endDateTime = LocalDateTime.of(date, end);

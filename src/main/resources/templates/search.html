@@ -4,9 +4,9 @@
     <div class="stack">
         <section class="card">
             <h1 class="section-title">Search Rooms</h1>
-            <p class="section-subtitle">Filter by building, amenities, capacity, and time window.</p>
+            <p class="section-subtitle">Find available rooms by building, amenities, capacity, and time window.</p>
 
-            <form th:action="@{/search}" method="get" th:object="${criteria}">
+            <form id="searchForm" th:action="@{/search}" method="get" th:object="${criteria}">
                 <div class="grid grid-2">
                     <div class="field-group">
                         <label for="buildingId">Building</label>
@@ -26,12 +26,12 @@
 
                     <div class="field-group">
                         <label for="date">Date</label>
-                        <input id="date" type="date" th:field="*{date}" required />
+                        <input id="date" type="date" th:field="*{date}" />
                     </div>
 
                     <div class="field-group">
                         <label for="start">Start Time</label>
-                        <select id="start" th:field="*{start}" required>
+                        <select id="start" th:field="*{start}" >
                             <option value="">-- Select --</option>
                             <option th:each="t : ${timeOptions}"
                                     th:value="${t}"
@@ -42,7 +42,7 @@
 
                     <div class="field-group">
                         <label for="end">End Time</label>
-                        <select id="end" th:field="*{end}" required>
+                        <select id="end" th:field="*{end}" >
                             <option value="">-- Select --</option>
                             <option th:each="t : ${timeOptions}"
                                     th:value="${t}"
@@ -64,69 +64,239 @@
 
                 <div class="actions">
                     <button type="submit" class="btn btn-primary">Search</button>
+                    <button type="button" class="btn btn-secondary" id="clearTimeBtn">Clear Time</button>
                 </div>
             </form>
         </section>
 
         <section class="card">
             <h2 class="section-title" style="font-size: 22px;">Results</h2>
-            <p class="section-subtitle">Availability for the selected date and time.</p>
 
             <div th:if="${rooms == null or #lists.isEmpty(rooms)}" class="empty-state">
                 No rooms found.
             </div>
 
+            <div class="results-filters" th:if="${rooms != null and !#lists.isEmpty(rooms)}">
+
+                <div class="grid grid-3">
+                    <div class="field-group" th:if="${criteria.hasTime}">
+                        <label for="resultAvailabilityFilter">Availability</label>
+                        <select id="resultAvailabilityFilter">
+                            <option value="">All</option>
+                            <option value="available">Yes</option>
+                            <option value="unavailable">No</option>
+                        </select>
+                    </div>
+
+                    <div class="field-group">
+                        <label for="resultCapacitySort">Capacity</label>
+                        <select id="resultCapacitySort">
+                            <option value="">Default</option>
+                            <option value="asc">Ascending</option>
+                            <option value="desc">Descending</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
             <div class="table-wrap" th:if="${rooms != null and !#lists.isEmpty(rooms)}">
-                <table>
+                <table id="resultsTable">
                     <thead>
                         <tr>
+                            <!-- Always Present Headers -->
                             <th>ID</th>
                             <th>Name</th>
                             <th>Capacity</th>
                             <th>Building</th>
-                            <th>Start</th>
-                            <th>End</th>
-                            <th>Status</th>
-                            <th>Book</th>
+                            <!-- Time-Based Headers -->
+                            <th th:if="${criteria.hasTime}">End</th>
+                            <th th:if="${criteria.hasTime}">Status</th>
+                            <th th:if="${criteria.hasTime}">Book</th>
+                            <!-- No-Time Headers -->
+                            <th th:unless="${criteria.hasTime}">Check Availability</th>
+                            <!-- Always Present Header -->
                             <th>Details</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        <tr th:each="result : ${rooms}">
-                            <td th:text="${result.room.id}"></td>
-                            <td th:text="${result.room.name}"></td>
-                            <td th:text="${result.room.capacity}"></td>
-                            <td th:text="${result.room.building.name}"></td>
-                            <td th:text="${criteria.start}"></td>
-                            <td th:text="${criteria.end}"></td>
-                            <td>
-                                <span th:if="${result.bookable}" class="status-badge status-available">Available</span>
-                                <span th:if="${!result.available and result.buildingOpen}" class="status-badge status-booked">Booked</span>
-                                <span th:if="${result.available and !result.buildingOpen}" class="status-badge status-closed">Building Closed</span>
-                                <span th:if="${!result.available and !result.buildingOpen}" class="status-badge status-mixed">Booked / Building Closed</span>
-                            </td>
-                            <td>
-                                <form th:if="${result.bookable}" th:action="@{/reservations/book}" method="post" class="inline-form">
-                                    <input type="hidden" name="roomId" th:value="${result.room.id}" />
-                                    <input type="hidden" name="date" th:value="${criteria.date}" />
-                                    <input type="hidden" name="startTime" th:value="${criteria.start}" />
-                                    <input type="hidden" name="endTime" th:value="${criteria.end}" />
-                                    <button type="submit" class="btn btn-primary">Book</button>
-                                </form>
-                            </td>
-                            <td>
-                                <form th:action="@{/rooms/{id}(id=${result.room.id})}" method="get" class="inline-form">
-                                    <input type="hidden" name="date" th:value="${criteria.date}" />
-                                    <input type="hidden" name="start" th:value="${criteria.start}" />
-                                    <input type="hidden" name="end" th:value="${criteria.end}" />
-                                    <button type="submit" class="btn btn-secondary">View Details</button>
-                                </form>
-                            </td>
-                        </tr>
-                    </tbody>
+                  <tbody>
+                    <!-- Always Present -->
+                    <tr th:each="result : ${rooms}"
+                        th:attr="data-available=${result.bookable ? 'available' : 'unavailable'},
+                                data-capacity=${result.room.capacity},
+                                data-building=${result.room.building.name}">
+
+                        <td th:text="${result.room.id}"></td>
+                        <td th:text="${result.room.name}"></td>
+                        <td th:text="${result.room.capacity}"></td>
+                        <td th:text="${result.room.building.name}"></td>
+
+                        <!-- TIME-BASED COLUMNS -->
+                        <td th:if="${criteria.hasTime}" th:text="${criteria.end}"></td>
+
+                        <td th:if="${criteria.hasTime}">
+                            <span th:if="${result.bookable}" class="status-badge status-available">Available</span>
+                            <span th:if="${!result.available and result.buildingOpen}" class="status-badge status-booked">Booked</span>
+                            <span th:if="${result.available and !result.buildingOpen}" class="status-badge status-closed">Building Closed</span>
+                            <span th:if="${!result.available and !result.buildingOpen}" class="status-badge status-mixed">Booked / Building Closed</span>
+                        </td>
+
+                        <td th:if="${criteria.hasTime}">
+                            <form th:if="${result.bookable}" th:action="@{/reservations/book}" method="post" class="inline-form">
+                                <input type="hidden" name="roomId" th:value="${result.room.id}" />
+                                <input type="hidden" name="date" th:value="${criteria.date}" />
+                                <input type="hidden" name="startTime" th:value="${criteria.start}" />
+                                <input type="hidden" name="endTime" th:value="${criteria.end}" />
+                                <button type="submit" class="btn btn-primary">Book</button>
+                            </form>
+                        </td>
+
+                        <!-- NO-TIME COLUMN -->
+                    <td th:unless="${criteria.hasTime}">
+                        <form th:action="@{/rooms/{id}(id=${result.room.id})}" method="get" class="inline-form availability-form">
+                            <input type="hidden" name="start" th:value="${criteria.start}" />
+                            <input type="hidden" name="end" th:value="${criteria.end}" />
+
+                            <input type="date" name="date" class="inline-date-picker" style="display:none;" />
+
+                            <button type="button" class="btn btn-primary check-availability-btn">
+                                Check Availability
+                            </button>
+
+                            <button type="submit" class="btn btn-secondary submit-availability-btn" style="display:none;">
+                                Go
+                            </button>
+                        </form>
+                    </td>
+
+                        <!-- ALWAYS PRESENT -->
+                        <td>
+                            <form th:action="@{/rooms/{id}(id=${result.room.id})}" method="get" class="inline-form">
+                                <input type="hidden" name="date" th:value="${criteria.date}" />
+                                <input type="hidden" name="start" th:value="${criteria.start}" />
+                                <input type="hidden" name="end" th:value="${criteria.end}" />
+                                <button type="submit" class="btn btn-secondary">View Details</button>
+                            </form>
+                        </td>
+                    </tr>
+                </tbody>
                 </table>
             </div>
         </section>
     </div>
+    <script>
+        //JavaScript for form validation, dynamic availability checks, and client-side filtering -
+
+
+        const searchForm = document.getElementById("searchForm");
+        const dateInput = document.getElementById("date");
+        const startInput = document.getElementById("start");
+        const endInput = document.getElementById("end");
+        const clearTimeBtn = document.getElementById("clearTimeBtn");
+
+        function clearTimeFields() {
+            dateInput.value = "";
+            startInput.value = "";
+            endInput.value = "";
+        }
+
+        clearTimeBtn.addEventListener("click", function () {
+            clearTimeFields();
+        });
+
+        searchForm.addEventListener("submit", function (e) {
+            const date = dateInput.value.trim();
+            const start = startInput.value.trim();
+            const end = endInput.value.trim();
+
+            const allEmpty = date === "" && start === "" && end === "";
+            const allFilled = date !== "" && start !== "" && end !== "";
+
+            if (!allEmpty && !allFilled) {
+                e.preventDefault();
+                alert("Fill Date, Start Time, and End Time together, or leave all blank.");
+            }
+        });
+
+        document.querySelectorAll(".check-availability-btn").forEach(button => {
+            button.addEventListener("click", function () {
+            const form = this.closest("form");
+            const dateInput = form.querySelector(".inline-date-picker");
+            const submitBtn = form.querySelector(".submit-availability-btn");
+
+            dateInput.style.display = "inline-block";
+            submitBtn.style.display = "inline-block";
+            this.style.display = "none";
+
+            if (dateInput.value === "") {
+                dateInput.focus();
+            }
+            });
+        });
+
+        document.querySelectorAll(".availability-form").forEach(form => {
+            form.addEventListener("submit", function (e) {
+                const dateInput = form.querySelector(".inline-date-picker");
+
+                if (!dateInput.value) {
+                    e.preventDefault();
+                    alert("Please select a date.");
+                }
+            });
+        });
+
+
+        //Filer logic
+        const availabilityFilter = document.getElementById("resultAvailabilityFilter");
+        const capacitySort = document.getElementById("resultCapacitySort");
+        const resultsTable = document.getElementById("resultsTable");
+
+        function applyResultFilters() {
+            if (!resultsTable) return;
+
+            const tbody = resultsTable.querySelector("tbody");
+            const rows = Array.from(tbody.querySelectorAll("tr"));
+
+            const availabilityValue = availabilityFilter ? availabilityFilter.value : "";
+            const capacitySortValue = capacitySort ? capacitySort.value : "";
+
+            rows.forEach(row => {
+                const rowAvailability = row.dataset.available || "";
+                const rowBuilding = row.dataset.building || "";
+
+                let matches = true;
+
+                if (availabilityValue && rowAvailability !== availabilityValue) {
+                    matches = false;
+                }
+
+               
+
+                row.style.display = matches ? "" : "none";
+            });
+
+            if (capacitySortValue === "asc" || capacitySortValue === "desc") {
+                rows.sort((a, b) => {
+                    const aCapacity = parseInt(a.dataset.capacity || "0", 10);
+                    const bCapacity = parseInt(b.dataset.capacity || "0", 10);
+
+                    return capacitySortValue === "asc"
+                        ? aCapacity - bCapacity
+                        : bCapacity - aCapacity;
+                });
+
+                rows.forEach(row => tbody.appendChild(row));
+            }
+        }
+
+        if (availabilityFilter) {
+            availabilityFilter.addEventListener("change", applyResultFilters);
+        }
+
+        if (capacitySort) {
+            capacitySort.addEventListener("change", applyResultFilters);
+        }
+
+
+    </script>
 </th:block>
 </html>

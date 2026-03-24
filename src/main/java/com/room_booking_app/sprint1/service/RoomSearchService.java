@@ -24,9 +24,6 @@ public class RoomSearchService {
     }
 
     public List<RoomSearchResult> search(RoomSearchCriteria criteria) {
-        long startDebug = System.currentTimeMillis();
-
-
 
         Specification<Room> spec = (root, query, cb) -> cb.conjunction();
 
@@ -53,7 +50,9 @@ public class RoomSearchService {
 
         List<Room> rooms = roomRepository.findAll(spec);
 
-        if (criteria.getDate() != null && criteria.getStart() != null && criteria.getEnd() != null) {
+        List<RoomSearchResult> results;
+
+        if (criteria.isHasTime()) {
             LocalDate d = criteria.getDate();
             LocalTime s = LocalTime.parse(criteria.getStart());
             LocalTime e = LocalTime.parse(criteria.getEnd());
@@ -61,7 +60,7 @@ public class RoomSearchService {
             LocalDateTime start = LocalDateTime.of(d, s);
             LocalDateTime end = LocalDateTime.of(d, e);
 
-            return rooms.stream()
+                results = rooms.stream()
                     .map(room -> {
                         boolean available = reservationRepository
                                 .findOverlappingReservations(room.getId(), start, end)
@@ -75,12 +74,17 @@ public class RoomSearchService {
                     .toList();
         }
 
-        long endDebug = System.currentTimeMillis();
-        System.out.println("RoomSearchService.search took " + (endDebug - startDebug) + " ms");
-        return rooms.stream()
-                .map(room -> new RoomSearchResult(room, false, false))
-                .toList();
+        // If no date/time criteria, just return rooms without availability info
+       else{  
+            results =  rooms.stream()
+            .map(room -> new RoomSearchResult(room, false, false))
+            .toList();
+       }
+
+       
+
+    return results;
+    }
         
     }
     
-}

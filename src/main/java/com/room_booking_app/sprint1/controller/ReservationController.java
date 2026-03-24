@@ -49,7 +49,7 @@ public class ReservationController {
 
         } catch (IllegalStateException | IllegalArgumentException ex) {
             // IllegalStateException: conflict / already booked
-            // IllegalArgumentException: bad time window, etc.
+            // IllegalArgumentException: bad time window
             redirectAttributes.addFlashAttribute("bookingError", ex.getMessage());
             return "redirect:/reservations/failed";
         }

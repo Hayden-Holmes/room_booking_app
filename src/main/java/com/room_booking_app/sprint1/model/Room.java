@@ -19,8 +19,6 @@ import java.util.Set;
 @Table(name = "room")
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString(onlyExplicitlyIncluded = true)
-@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Room {
 
     @Id
@@ -36,8 +34,6 @@ public class Room {
 
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "building_id", nullable = false)
-    @ToString.Exclude
-    @EqualsAndHashCode.Exclude
     private Building building;
 
     @ManyToMany
@@ -46,13 +42,9 @@ public class Room {
             joinColumns = @JoinColumn(name = "room_id"),
             inverseJoinColumns = @JoinColumn(name = "amenity_id")
     )
-    @ToString.Exclude
-    @EqualsAndHashCode.Exclude
     private Set<Amenity> amenities = new HashSet<>();
 
     @OneToMany(mappedBy = "room")
-    @ToString.Exclude
-    @EqualsAndHashCode.Exclude
     private Set<Reservation> reservations = new HashSet<>();
 
     public boolean isAvailableDuring(LocalDateTime start, LocalDateTime end) {

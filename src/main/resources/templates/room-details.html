@@ -4,7 +4,7 @@
     <div class="stack">
         <section class="card">
             <h1 class="section-title">Room Details</h1>
-            <p class="section-subtitle">Availability, building access, and booking details.</p>
+            <p class="section-subtitle">Availability, building access, and booking information for the selected space.</p>
 
             <div th:if="${room != null}" class="details-grid">
                 <div class="detail-item">
@@ -50,15 +50,15 @@
             </div>
 
             <div th:if="${date == null or start == null or end == null}" class="empty-state">
-                No date/time selected.
+                No time has been selected.
             </div>
 
             <div th:if="${buildingOpen != null and !buildingOpen}" class="message message-warning">
-                Building is closed during the selected time.
+                Building access is closed during the selected time.
             </div>
 
             <div th:if="${roomAvailable != null and !roomAvailable}" class="message message-error">
-                Room is already reserved during the selected time.
+                This room is already reserved during the selected time.
             </div>
         </section>
 

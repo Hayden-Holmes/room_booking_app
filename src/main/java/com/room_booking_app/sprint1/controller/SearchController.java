@@ -46,6 +46,8 @@ public class SearchController {
         return "search";
     }
 
+
+    //Should be generated in model logic
     private List<String> generateQuarterHours() {
         List<String> timeOptions = new ArrayList<>();
         for (int hour = 7; hour < 24; hour++) {

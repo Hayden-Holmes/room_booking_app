@@ -14,6 +14,8 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 
+
+
 public final class RoomSpecifications {
 
     private RoomSpecifications() { }
@@ -58,28 +60,27 @@ public final class RoomSpecifications {
     
     public static Specification<Room> isAvailable(LocalDateTime start, LocalDateTime end) {
         return (roomRoot, query, cb) -> {
-            //throw exeption if only one of start/end is provided, otherwise ignore availability filter
+          
 
             if (start == null || end == null) {
                 if (start != null || end != null) {
                     throw new IllegalArgumentException("Both start and end must be provided together");
                 }
-                return cb.conjunction(); // ignore availability filter if not provided
+                return cb.conjunction(); 
             }
 
-            // Subquery: find any overlapping reservation for this room
-            var sub = query.subquery(Long.class); // subquery returns 1L if an overlapping reservation exists
-            var res = sub.from(Reservation.class);// root of subquery is Reservation
+           
+            var sub = query.subquery(Long.class); 
+            var res = sub.from(Reservation.class);
 
             sub.select(cb.literal(1L))
                .where(
                    cb.equal(res.get("room"), roomRoot),
-                   cb.equal(res.get("status"), Reservation.ReservationStatus.BOOKED),//!! grabbing enum from reservation model
+                   cb.equal(res.get("status"), Reservation.ReservationStatus.BOOKED),
                    cb.lessThan(res.get("startTime"), end),
                    cb.greaterThan(res.get("endTime"), start)
                );
 
-            // NOT EXISTS (subquery)
             return cb.not(cb.exists(sub));
         };
     }

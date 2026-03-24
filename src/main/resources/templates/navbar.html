@@ -5,11 +5,11 @@
         <div class="nav-left">
             <a th:href="@{/search}" class="brand">Room Booking</a>
             <a th:href="@{/search}" class="nav-link">Search</a>
-            <a th:href="@{/dashboard}" class="nav-link">Dashboard</a>
+            <a th:href="@{/dashboard}" class="nav-link">My Reservations</a>
         </div>
 
         <form th:action="@{/logout}" method="post" class="inline-form">
-            <button type="submit" class="btn btn-danger">Logout</button>
+            <button type="submit" class="btn btn-secondary">Sign Out</button>
         </form>
     </nav>
 </body>
