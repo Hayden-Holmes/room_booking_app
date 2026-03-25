@@ -14,6 +14,12 @@ This application allows users to search for rooms, view availability, and create
 - Seed data:
   - Reservations are preloaded for **April 30th**
   - Use this date to test availability and booking behavior
+ 
+  - **Note**
+  - In the final deployment on Render, **sucessfully** booking a room experiences significant latency (~1+ minute) before completing. The reservation is eventually created, but the delay is substantially higher than expected.
+  - This issue does **not occur in the local environment**, where bookings complete quickly.
+  - Initial hypothesis was that the delay was caused by email confirmation, as Render (free tier) does not support SMTP on port 587. However, configuring a 5-second SMTP timeout in `application.properties` did not resolve the issue.
+  - Based on current observations, the bottleneck is likely within the backend processing—potentially related to query execution (e.g., JPA Specifications)—though this has not been definitively confirmed.
 
 
 ## Core Functionalities
